@@ -75,8 +75,7 @@ class CRM_Caseemail_CivirulesAction_Send extends CRM_Emailapi_CivirulesAction_Se
       $locationText = "primary e-mailaddress";
     }
     $caseRoles = $params['case_roles_select'];
-    $to = $this->getEmailFromCaseRoles($caseRoles);
-    $to = 'contact ids: ' . implode('; ', $to);
+    $to = 'case roles: ' . implode('; ', $caseRoles);
     $cc = "";
     if (!empty($params['cc'])) {
       $cc = ts(' and cc to %1', array(1=>$params['cc']));
@@ -104,9 +103,8 @@ class CRM_Caseemail_CivirulesAction_Send extends CRM_Emailapi_CivirulesAction_Se
       'case_id' => $caseId,
     ))['values'];
     foreach ($result as $rel) {
-      $to[] = $rel['contact_id_b'];
+      $to[$rel['contact_id_b']] = $rel['contact_id_b'];
     }
-    drupal_set_message('<pre>cr result: '.print_r($result, 1).'</pre>');
     return $to;
   }
 
