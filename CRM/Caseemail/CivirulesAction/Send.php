@@ -12,8 +12,9 @@ class CRM_Caseemail_CivirulesAction_Send extends CRM_Emailapi_CivirulesAction_Se
    */
   protected function alterApiParameters($parameters, CRM_Civirules_TriggerData_TriggerData $triggerData) {
     //this method could be overridden in subclasses to alter parameters to meet certain criteria
+    $case = $triggerData->getEntityData("Case");
     $caseRoles = $parameters['case_roles_select'];
-    $to = $this->getEmailFromCaseRoles($caseRoles);
+    $to = $this->getEmailFromCaseRoles($caseRoles, $case['id']);
     $parameters['contact_id'] = array('IN' => $to);
     if (!empty($actionParameters['cc'])) {
       $parameters['cc'] = $actionParameters['cc'];
@@ -95,11 +96,12 @@ class CRM_Caseemail_CivirulesAction_Send extends CRM_Emailapi_CivirulesAction_Se
     ));
   }
 
-  protected function getEmailFromCaseRoles($caseRoles = array()) {
+  protected function getEmailFromCaseRoles($caseRoles = array(), $caseId) {
     $to = array();
     $result = civicrm_api3('Relationship', 'get', array(
       'sequential' => 1,
       'relationship_type_id' => array('IN' => $caseRoles),
+      'case_id' => $caseId,
     ))['values'];
     foreach ($result as $rel) {
       $to[] = $rel['contact_id_b'];
@@ -107,4 +109,17 @@ class CRM_Caseemail_CivirulesAction_Send extends CRM_Emailapi_CivirulesAction_Se
     drupal_set_message('<pre>cr result: '.print_r($result, 1).'</pre>');
     return $to;
   }
+
+  /**
+   * Validates whether this action works with the selected trigger.
+   *
+   * @param CRM_Civirules_Trigger $trigger
+   * @param CRM_Civirules_BAO_Rule $rule
+   * @return bool
+   */
+  public function doesWorkWithTrigger(CRM_Civirules_Trigger $trigger, CRM_Civirules_BAO_Rule $rule) {
+    $entities = $trigger->getProvidedEntities();
+    return isset($entities['Case']);
+  }
+
 }
