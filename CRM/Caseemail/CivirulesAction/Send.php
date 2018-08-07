@@ -15,7 +15,7 @@ class CRM_Caseemail_CivirulesAction_Send extends CRM_Emailapi_CivirulesAction_Se
     $case = $triggerData->getEntityData("Case");
     $caseRoles = $parameters['case_roles_select'];
     $to = $this->getEmailFromCaseRoles($caseRoles, $case['id']);
-    $parameters['contact_id'] = array('IN' => $to);
+    $parameters['contact_id'] = implode(',', $to);
     if (!empty($actionParameters['cc'])) {
       $parameters['cc'] = $actionParameters['cc'];
     }
